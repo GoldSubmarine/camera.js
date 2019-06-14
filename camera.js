@@ -1,5 +1,5 @@
 /*
-	camera.js v1.1
+	camera.js v1.2
 	http://github.com/idevelop/camera.js
 
 	Author: Andrei Gheorghe (http://idevelop.github.com)
@@ -15,22 +15,25 @@ var camera = (function() {
 		video = document.createElement("video");
 		video.setAttribute('width', options.width);
 		video.setAttribute('height', options.height);
+		video.setAttribute('playsinline', 'true');
+		video.setAttribute('webkit-playsinline', 'true');
 
 		navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia;
 		window.URL = window.URL || window.webkitURL || window.mozURL || window.msURL;
 
 		if (navigator.getUserMedia) {
 			navigator.getUserMedia({
-				video: true
+				video: true,
+				audio: false,
 			}, function(stream) {
 				options.onSuccess();
 
 				if (video.mozSrcObject !== undefined) { // hack for Firefox < 19
 					video.mozSrcObject = stream;
 				} else {
-					video.src = (window.URL && window.URL.createObjectURL(stream)) || stream;
+					video.srcObject = stream;
 				}
-				
+
 				initCanvas();
 			}, options.onError);
 		} else {
@@ -50,8 +53,6 @@ var camera = (function() {
 			context.translate(canvas.width, 0);
 			context.scale(-1, 1);
 		}
-
-		startCapture();
 	}
 
 	function startCapture() {
@@ -71,9 +72,11 @@ var camera = (function() {
 		pauseCapture();
 
 		if (video.mozSrcObject !== undefined) {
+			video.mozSrcObject.getVideoTracks()[0].stop();
 			video.mozSrcObject = null;
 		} else {
-			video.src = "";
+			video.srcObject.getVideoTracks()[0].stop();
+			video.srcObject = null;
 		}
 	}
 
@@ -109,3 +112,5 @@ var camera = (function() {
 		stop: stopCapture
 	};
 })();
+
+export default camera;
