@@ -1,5 +1,5 @@
 /*
-	camera.js v1.2
+	camera.js v1.3
 	http://github.com/idevelop/camera.js
 
 	Author: Andrei Gheorghe (http://idevelop.github.com)
@@ -18,12 +18,34 @@ var camera = (function() {
 		video.setAttribute('playsinline', 'true');
 		video.setAttribute('webkit-playsinline', 'true');
 
-		navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia;
+		navigator.getUserMedia = navigator.getUserMedia || navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia;
 		window.URL = window.URL || window.webkitURL || window.mozURL || window.msURL;
 
-		if (navigator.getUserMedia) {
+		if (navigator.mediaDevices) {
+			navigator.mediaDevices.getUserMedia({	//新的api
+				video: {
+					width: options.width,
+					height: options.height
+				},
+				audio: false
+			}).then(stream => {
+				options.onSuccess();
+
+				if (video.mozSrcObject !== undefined) { // hack for Firefox < 19
+					video.mozSrcObject = stream;
+				} else {
+					video.srcObject = stream;
+				}
+
+				initCanvas();
+			}).catch(err => options.onError())
+
+		} else if (navigator.getUserMedia) {	// 旧的 api
 			navigator.getUserMedia({
-				video: true,
+				video: {
+					width: options.width,
+					height: options.height
+				},
 				audio: false,
 			}, function(stream) {
 				options.onSuccess();
@@ -36,6 +58,7 @@ var camera = (function() {
 
 				initCanvas();
 			}, options.onError);
+
 		} else {
 			options.onNotSupported();
 		}
