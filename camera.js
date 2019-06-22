@@ -1,5 +1,5 @@
 /*
-	camera.js v1.3
+	camera.js v1.4
 	http://github.com/idevelop/camera.js
 
 	Author: Andrei Gheorghe (http://idevelop.github.com)
@@ -94,10 +94,10 @@ var camera = (function() {
 	function stopCapture() {
 		pauseCapture();
 
-		if (video.mozSrcObject !== undefined) {
+		if (video.mozSrcObject !== undefined && video.mozSrcObject.getVideoTracks) {
 			video.mozSrcObject.getVideoTracks()[0].stop();
 			video.mozSrcObject = null;
-		} else {
+		} else if(video.srcObject && video.srcObject.getVideoTracks) {
 			video.srcObject.getVideoTracks()[0].stop();
 			video.srcObject = null;
 		}
